@@ -25,7 +25,7 @@
 //unsigned char    data    octave = 	4; 	/* Set inital octave to 4 */
 
 void set_Tone(unsigned short);
-unsigned short octave_Adjust(unsigned char, unsigned char);
+unsigned short octave_Adjust(unsigned char, unsigned short);
 void PB_to_select_Tone();
 void UpdateDisplay();
 
@@ -49,6 +49,28 @@ void UpdateDisplay();
 //	//We're done here, proceed to update the display and return to the MainLoop.
 //    char tone_select = 0;
 //    char i;
+void PORT1_TO_PLAY_TONE(void){
+	alteredPort = P1&0xFE; 	/* Initially disregard pushbutton 1 */
+	unsigned char button;
+	unsigned char i,j;
+	unsigned short tone;
+	for(i = 1; i<8; i++){ 	/* Check buttons 1 to 7 inclusive */
+		button_i = ((alteredPort>>i)+1)%2; /* Move value to the right then increment by one then take the modulo to check whether button is active */
+		/* button_i ACTIVE HIGH */
+		if(button_i){/* a key has been pressed */
+			TR2 = 1;		/* Run timer2 if a button is set */
+			j = i-1; /* Normalize for pointing to an array */
+			if(~PB1){
+				j = j+7; /* Adjust j so it will point to the sharp of the note */
+			}
+			tone = octave_Adjust(octave, j);
+			set_Tone(tone);
+		}
+	}
+}
+
+
+
 void PB_to_select_Tone(void){
 	char tone_select = 0;
 	char i;
@@ -135,6 +157,18 @@ void PB_to_select_Tone(void){
 	}
 	
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void UpdateDisplay()

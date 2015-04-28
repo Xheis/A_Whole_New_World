@@ -32,9 +32,10 @@
 
 /*    Definitions    */
 #define  	WAVE_RESOLUTION    256   	// Our 256bit sine wave resolution
-#define    	MAX_VOLUME        16    	// 16 different volumes
+#define   MAX_VOLUME        16    	// 16 different volumes
 #define 	SINE_OFFSET     128 		// DC offset for sin wave
 #define 	DEFAULT_OCTAVE	4
+#define 	MAX_NUM_NOTES		7
 
 
 /*    Global Variables        */
@@ -42,11 +43,13 @@ unsigned  int    data    theta = 0;
 
 
 /* Variable for moving through the 8-bit sine wave */
-unsigned char    data     volume = 	1; 	/* Volume 0-15. 0=> mute, 15=> max */
-unsigned char    data    octave = 	4; 	/* Set inital octave to 4 */
+unsigned char    data     volume = 	15; 	/* Volume 0-15. 0=> mute, 15=> max */
+unsigned char    data    octave = 	7; 	/* Set inital octave to 4 */
 
-/* Tones and their frequencies 		C		C#		D		Eb		E		F		F#		G		G#		A		Bb		B	*/
-unsigned short	 code	tone[]	=	{262,	277,	294,	311,	330,	349,	370,	392,	415,	440,	466,	494};
+
+
+/*	Tones and their frequencies		C		 D		E		 F	  G		 A		B	 	 C#	  D#   E   F#   G#   A#    B			*/
+unsigned short	 code	tone[]	=	{262,	294, 330,	349, 392,	440, 494, 277, 311, 330, 370, 415, 466, 494};
 
 const char    code    sin[] = { 
                                     /* DAC voltages for 8-bit, 16 volume sine wave */
@@ -54,8 +57,7 @@ const char    code    sin[] = {
                                     
                                     #include "sine_8_bits.csv"    /* 256 piece sine wave */
                                 };
-								
-								
+
 const unsigned char	code delay_HB[] = {
 																		#include "delay_HB.csv"
 };
@@ -63,12 +65,11 @@ const unsigned char	code delay_HB[] = {
 const unsigned char	code delay_LB[] = {
 																		#include "delay_LB.csv"
 };
-
 								
 volatile unsigned short Dtheta;		//Our Dtheta variable does...
 
 void set_Tone(unsigned short);
-unsigned short octave_Adjust(unsigned char, unsigned char);
+unsigned short octave_Adjust(unsigned char, unsigned short);
 void DAC_Init();
 void Timer_Init();
 void Voltage_Reference_Init();
@@ -118,10 +119,24 @@ void Oscillator_Init()
 --------------------------------------------------------------------------------------------------------------------*/
 void Timer_Init()
 {
-    SFRPAGE   = TMR2_PAGE;
+		SFRPAGE   = TIMER01_PAGE; /* Initialize Timer1 */
+    TCON      = 0x40;
+    TMOD      = 0x20;
+    CKCON     = 0x02;					/* Auto Reload Timer		 */
+    TL1       = delay_LB[0];
+    TH1       = delay_HB[0];
+		
+		TCON      = 0x40;
+    TMOD      = 0x20;
+    CKCON     = 0x02;
+    TL1       = 0x45;
+    TH1       = 0x45;
+	
+	
+    SFRPAGE   = TMR2_PAGE; 	/* Initialize Timer1 */
     TMR2CN    = 0x04;
     TMR2CF    = 0x0A;
-    RCAP2L    = 0x45;
+    RCAP2L    = 0x45;				/* Set recap value for a 65536Hz timer */
     RCAP2H    = 0xFF;
 }
 
@@ -192,6 +207,40 @@ void DAC_Sine_Wave(void){
     theta = theta + Dtheta;    /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
 }
 
+void	theta_Manager(void){
+	unsigned char i; 
+	unsigned char num_buttons_pushed = 0, 
+	unsigned char alteredPort;
+	alteredPort = P1&0xFE; /* disregard pushbutton 1 */
+	for(i = 0; i<8; i++){
+		num_buttons_pushed += ((alteredPort>>i)+1)%2; /* Move value to the right then increment by one then take the modulo */
+		/* This will increment num_buttons_pushed*/
+		/* Push buttons are 0 if active.  */
+	}
+	
+	
+	
+	
+}
+
+
+void	theta_Manager(void){
+	unsigned char i; 
+	unsigned char num_buttons_pushed = 0, 
+	unsigned char alteredPort;
+	unsigned short notes[12]={0};
+	
+	alteredPort = P1&0xFE; /* disregard pushbutton 1 */
+	for(i = 0; i<8; i++){
+		num_buttons_pushed += ((alteredPort>>i)+1)%2; /* Move value to the right then increment by one then take the modulo */
+		/* This will increment num_buttons_pushed*/
+		/* Push buttons are 0 if active.  */
+	}
+	
+	
+	
+	
+}
 
 /*		Set_Volume				*/
 	
@@ -232,10 +281,8 @@ void set_Tone(unsigned short i)
     Dtheta = i;
 }
 
-
-
 void delay(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
-	if(delay_len==0){	/* Just to double check that we haven't called a delay which doesn't exist */
+	if(delay_len==0){	/* Just to double check that we havent called a delay which doesnt exsist */
 		delay_len++;
 	}
 	delay_len--;	/* Decrement delay_len so it points to the correct array pointer to value */
@@ -244,11 +291,14 @@ void delay(unsigned char delay_len){ /* a millisecond delay - caution CPU can do
 	}
 	TL1 = delay_LB[delay_len];	/* Set lowbyte 										*/
   TH1 = delay_HB[delay_len];	/* Set highbyte 									*/
-	TF1 = 0;											/* Clear Timer1 Flag 							*/
+	TF = 0;											/* Clear Timer1 Flag 							*/
 	TR1 = 1; 										/* Turn on Timer1 								*/
 	while(~TF1);								/* wait till timer flag is set 		*/
 	TR1 = 0; 										/* Turn off Timer1 								*/
 }
+		
+
+
 
 
 #endif
