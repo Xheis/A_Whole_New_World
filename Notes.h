@@ -34,7 +34,7 @@
 #define 	SINE_OFFSET     		128 		// DC offset for sin wave
 #define 	DEFAULT_OCTAVE			4
 #define 	DEFAULT_VOLUME			4				// Defualt volume. 0-15. 0=> mute
-
+#define		NUM_NOTES		14
 
 
 /*    Global Variables        */
@@ -74,6 +74,10 @@ void Voltage_Reference_Init();
 void DAC_Sine_Wave();
 void DAC_Multi_Sine_Wave();
 void Set_Volume(unsigned char);
+void delay_run(unsigned char);
+void delay(unsigned short);
+
+
 
 /*		Voltage_Reference_Init	*/
 /*--------------------------------------------------------------------------------------------------------------------
@@ -183,7 +187,7 @@ void Interrupts_Init()
 --------------------------------------------------------------------------------------------------------------------*/
 void Timer2_ISR (void) interrupt 5
 {
-      DAC_Sine_Wave();
+      DAC_Multi_Sine_Wave();
     
     TF2 = 0;        // Reset Interrupt
 
@@ -200,17 +204,14 @@ void Timer2_ISR (void) interrupt 5
 
 --------------------------------------------------------------------------------------------------------------------*/
 /* Run through sine wave */
-void DAC_Sine_Wave(void){
-    unsigned char i = (unsigned char)((theta&0xFF00)>>8);
-    DAC0H = SINE_OFFSET + volume*(sin[i])/MAX_VOLUME;        /*    Update the voltage in the DAC    */
-    theta = theta + d_theta;    /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
-}
+//void DAC_Sine_Wave(void){
+//    unsigned char i = (unsigned char)((theta[&0xFF00)>>8);
+ //   DAC0H = SINE_OFFSET + volume*(sin[i])/MAX_VOLUME;        /*    Update the voltage in the DAC    */
+//    theta = theta + d_theta;    /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
+//}
 
 
-void DAC_Multi_Sine_Wave(void){
-    DAC0H = SINE_OFFSET + volume*combinded_Sine()/MAX_VOLUME;        /*    Update the voltage in the DAC    */
-        /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
-}
+
 
 
 
@@ -237,10 +238,9 @@ void delay(unsigned short delay_len){
 	unsigned char num_Run, i;
 	num_Run = (delay_len&0xFF00)>>8; /* Number of times to run 8 bit delay */
 	for (i=0; i<num_Run; i++){
-		
-
-
-
+		delay_run(255);
+	}
+	delay_run(delay_len&0x00FF); /* Run the remainder of the delay */
 
 }	
 

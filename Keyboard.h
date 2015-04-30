@@ -25,11 +25,14 @@
 
 
 /* Function Prototypes */
-void set_Tone(unsigned short);
-void	theta_Manager(void)
-unsigned short octave_Adjust(unsigned char, unsigned short);
+void set_Tone(unsigned short, unsigned char);
+void theta_Manager(void);
+unsigned short octave_Adjust(unsigned char, unsigned char);
+unsigned char	combined_Sine(void);
 void PB_to_select_Tone();
 void UpdateLEDS();
+
+
 
 
 //void PB_to_select_Tone(void)
@@ -52,7 +55,7 @@ void UpdateLEDS();
 //    char tone_select = 0;
 //    char i;
 void PORT1_TO_PLAY_TONE(void){
-	alteredPort = P1&0xFE; 	/* Initially disregard pushbutton 1 */
+	unsigned char alteredPort = P1&0xFE; 	/* Initially disregard pushbutton 1 */
 	unsigned char button_i;
 	unsigned char i,j;
 	unsigned short tone;
@@ -95,7 +98,7 @@ unsigned short octave_Adjust(unsigned char OCT, unsigned char piano_key_select)
     return(altered_FREQ);
 }
 
-unsigned char	combinded_Sine(void){
+unsigned char	combined_Sine(void){
 	unsigned char i,j; 
 	unsigned short sine_combined = 0; /* The combined value of the notes */
 	for(i = 0; i< NUM_NOTES; i++){
@@ -115,6 +118,11 @@ void set_Tone(unsigned short frequency, unsigned char note_select)
 void UpdateLEDS()
 {
 	P2 = ~P1; /* Invert Port1 and display it on P2 leds */
+}
+
+void DAC_Multi_Sine_Wave(void){
+    DAC0H = SINE_OFFSET + volume*combined_Sine()/MAX_VOLUME;        /*    Update the voltage in the DAC    */
+        /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
 }
 
 

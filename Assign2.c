@@ -58,7 +58,7 @@ void main(void)
 				LD6 = ~LD6;
 				break;
 			case 1: /* Play Menu */
-				PB_to_select_Tone();
+				PORT1_TO_PLAY_TONE();
 				break;
 		}
 	}
@@ -103,3 +103,6 @@ void Check_State_Change()
 		}
 	}
 }
+
+
+
