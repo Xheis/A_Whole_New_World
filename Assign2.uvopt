@@ -139,32 +139,16 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>211</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
+          <LineNumber>87</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>-16774066</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>Notes.h</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression></Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>212</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>D:\University of Newcastle\2015 - Semster 1\ELEC2700\Assignments\Assignment 2\A_Whole_New_World\Notes.h</Filename>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>Assign2.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression></Expression>
         </Bp>
@@ -193,12 +177,12 @@
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>theta[0]</ItemText>
+          <ItemText>theta[5],0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>d_theta[0]</ItemText>
+          <ItemText>d_theta[5],0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
@@ -209,6 +193,31 @@
           <count>7</count>
           <WinNumber>1</WinNumber>
           <ItemText>debugcounter</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>i</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>DAC0H</ItemText>
+        </Ww>
+        <Ww>
+          <count>10</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>d_theta[0]</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>buttons_active</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>j</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

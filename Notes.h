@@ -32,7 +32,7 @@
 #define   MAX_VOLUME        	16    	// 16 different volumes
 #define   MAX_FADER      			255    	// 256 different fading volumes
 #define 	SINE_OFFSET     		128 		// DC offset for sin wave
-#define 	DEFAULT_OCTAVE			4
+#define 	DEFAULT_OCTAVE			7
 #define 	DEFAULT_VOLUME			15				// Defualt volume. 0-15. 0=> mute
 #define		NUM_NOTES		14
 
@@ -106,9 +106,10 @@ void Voltage_Reference_Init()
 --------------------------------------------------------------------------------------------------------------------*/
 void Oscillator_Init()
 {
-    SFRPAGE   = CONFIG_PAGE;
-    OSCICN    = 0x82;
+		SFRPAGE   = CONFIG_PAGE;
+    OSCICN    = 0x83;
 }
+
 
 
 /*		Timer_Init				*/
@@ -136,12 +137,14 @@ void Timer_Init()
     TH1       = 0x45;
 	
 	
-    SFRPAGE   = TMR2_PAGE; 	/* Initialize Timer1 */
+    SFRPAGE   = TMR2_PAGE;
     TMR2CN    = 0x04;
     TMR2CF    = 0x0A;
-    RCAP2L    = 0x45;				/* Set recap value for a 65536Hz timer */
-    RCAP2H    = 0xFF;
+    RCAP2L    = 0x8A;
+    RCAP2H    = 0xFE;
 }
+
+
 
 
 /*		DAC_Init				*/
@@ -188,8 +191,8 @@ void Interrupts_Init()
 void Timer2_ISR (void) interrupt 5
 {
 		LD1 = 1;
-    //DAC_Multi_Sine_Wave();
-    DAC_Sine_Wave();
+    DAC_Multi_Sine_Wave();
+    //DAC_Sine_Wave();  //  Working!
     TF2 = 0;        // Reset Interrupt
 
 }
