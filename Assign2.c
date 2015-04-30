@@ -26,7 +26,7 @@ ________________________________________________________________________________
 
 /* Variables */
 char gameState = 1;		/* Used for switching to and from the volume and play states	*/
-
+int debugcounter=0;
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Main
 
@@ -61,6 +61,11 @@ void main(void)
 				PORT1_TO_PLAY_TONE();
 				break;
 		}
+	}
+	
+	while(1)
+	{	
+		debugcounter +=1;
 	}
 }
 

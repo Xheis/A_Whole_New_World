@@ -33,12 +33,12 @@
 #define   MAX_FADER      			255    	// 256 different fading volumes
 #define 	SINE_OFFSET     		128 		// DC offset for sin wave
 #define 	DEFAULT_OCTAVE			4
-#define 	DEFAULT_VOLUME			4				// Defualt volume. 0-15. 0=> mute
+#define 	DEFAULT_VOLUME			15				// Defualt volume. 0-15. 0=> mute
 #define		NUM_NOTES		14
 
 
 /*    Global Variables        */
-unsigned  char    data    theta[NUM_NOTES] = {0};		
+unsigned  short   	    theta[NUM_NOTES] = {0};		
 volatile unsigned short d_theta[NUM_NOTES] = {0};		//Our d_theta variable does...
 unsigned char 	data 		num_active_keys = 0; /* The number of keys which are currently being pressed */
 unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=> max */
@@ -187,8 +187,9 @@ void Interrupts_Init()
 --------------------------------------------------------------------------------------------------------------------*/
 void Timer2_ISR (void) interrupt 5
 {
-      DAC_Multi_Sine_Wave();
-    
+		LD1 = 1;
+    //DAC_Multi_Sine_Wave();
+    DAC_Sine_Wave();
     TF2 = 0;        // Reset Interrupt
 
 }
@@ -204,11 +205,11 @@ void Timer2_ISR (void) interrupt 5
 
 --------------------------------------------------------------------------------------------------------------------*/
 /* Run through sine wave */
-//void DAC_Sine_Wave(void){
-//    unsigned char i = (unsigned char)((theta[&0xFF00)>>8);
- //   DAC0H = SINE_OFFSET + volume*(sin[i])/MAX_VOLUME;        /*    Update the voltage in the DAC    */
-//    theta = theta + d_theta;    /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
-//}
+void DAC_Sine_Wave(void){
+		unsigned char i = (unsigned char)((theta[0]&0xFF00)>>8);
+		DAC0H = SINE_OFFSET + volume*(sin[i])/MAX_VOLUME;        /*    Update the voltage in the DAC    */
+    theta[0] = theta[0] + d_theta[0];    /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
+}
 
 
 

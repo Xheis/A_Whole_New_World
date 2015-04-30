@@ -1,38 +1,4 @@
-#ifndef Keyboard
-#define Keyboard
-
-/*
------------------------------------------------------------------------------
------------------------------------------------------------------------------
------------------------------------------------------------------------------
----------			This is our Keyboard.header														---------
----------																														---------
----------			We will store functions related												---------
----------			to taking user input and playing/holding							---------
----------			notes. This will rely on calling upon									---------
----------			the Notes.header for functions/methods								---------
----------			related to generating and playing specific						---------
----------			frequency notes.																			---------
----------																														---------
----------																														---------
----------																														---------
------------------------------------------------------------------------------
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-*/
-/* Definitions */
-#define		NUM_NOTES		14
-
-
-/* Function Prototypes */
-void set_Tone(unsigned short, unsigned char);
-void theta_Manager(void);
-unsigned short octave_Adjust(unsigned char, unsigned char);
-unsigned char	combined_Sine(void);
-void PB_to_select_Tone();
-void UpdateLEDS();
-
-
+#include "Keyboard.h"
 
 
 //void PB_to_select_Tone(void)
@@ -55,7 +21,7 @@ void UpdateLEDS();
 //    char tone_select = 0;
 //    char i;
 void PORT1_TO_PLAY_TONE(void){
-	unsigned char alteredPort;
+	alteredPort = P1&0xFE; 	/* Initially disregard pushbutton 1 */
 	unsigned char button_i;
 	unsigned char i,j;
 	unsigned short tone;
@@ -63,27 +29,21 @@ void PORT1_TO_PLAY_TONE(void){
 	UpdateLEDS(); /* Display the notes pushed on the keyboard */
 	
 	for(i = 1; i<8; i++){ 	/* Check buttons 1 to 7 inclusive */
-		unsigned char tmp;
-		tmp = P1;
-		alteredPort = ~(tmp);
-		button_i = (alteredPort>>i)&0x01; /* Move value to the right then increment by one then take the modulo to check whether button is active */
+		button_i = ((alteredPort>>i)+1)%2; /* Move value to the right then increment by one then take the modulo to check whether button is active */
 		/* button_i ACTIVE HIGH */
 		buttons_active += button_i; /* Count the number of active notes */
-		
 		if(button_i){/* a key has been pressed */
 			TR2 = 1;		/* Run timer2 if a button is set */
 			j = i-1; /* Normalize for pointing to an array */
-			
 			if(~PB1){
 				j = j+7; /* Adjust j so it will point to the sharp of the note */
 			}
-			
 			tone = octave_Adjust(octave, j);
 			set_Tone(tone, j);
 			
 		}else{ /* if button has not been pressed */
 			set_Tone(0, j); /* Turn off note... This sets the d_theta to 0. We can therefore check the d_thetas for whether a note is being played */
-			//theta[j] = 0;		/* Reset theta position */
+			theta[j] = 0;		/* Reset theta position */
 		}
 	}
 	num_active_keys = buttons_active; /* list the number of active buttons */
@@ -118,7 +78,6 @@ unsigned char	combined_Sine(void){
 void set_Tone(unsigned short frequency, unsigned char note_select)
 {
     d_theta[note_select] = frequency;
-
 }
 
 
@@ -127,11 +86,4 @@ void UpdateLEDS()
 	P2 = ~P1; /* Invert Port1 and display it on P2 leds */
 }
 
-void DAC_Multi_Sine_Wave(void){
-    DAC0H = SINE_OFFSET + volume*combined_Sine()/MAX_VOLUME;        /*    Update the voltage in the DAC    */
-        /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
-}
 
-
-
-#endif
