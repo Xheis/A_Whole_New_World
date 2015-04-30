@@ -53,6 +53,8 @@ void main(void)
 			case 0: /* Volume Menu */
 				//Code here
 				LD7 = 0;
+				delay(250);
+				delay(250);
 				LD6 = ~LD6;
 				break;
 			case 1: /* Play Menu */

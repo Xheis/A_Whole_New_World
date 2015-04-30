@@ -20,14 +20,16 @@
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 */
+/* Definitions */
+#define		NUM_NOTES		14
 
-//#include "Notes.h"
-//unsigned char    data    octave = 	4; 	/* Set inital octave to 4 */
 
+/* Function Prototypes */
 void set_Tone(unsigned short);
+void	theta_Manager(void)
 unsigned short octave_Adjust(unsigned char, unsigned short);
 void PB_to_select_Tone();
-void UpdateDisplay();
+void UpdateLEDS();
 
 
 //void PB_to_select_Tone(void)
@@ -51,12 +53,16 @@ void UpdateDisplay();
 //    char i;
 void PORT1_TO_PLAY_TONE(void){
 	alteredPort = P1&0xFE; 	/* Initially disregard pushbutton 1 */
-	unsigned char button;
+	unsigned char button_i;
 	unsigned char i,j;
 	unsigned short tone;
+	unsigned char buttons_active = 0;
+	UpdateLEDS(); /* Display the notes pushed on the keyboard */
+	
 	for(i = 1; i<8; i++){ 	/* Check buttons 1 to 7 inclusive */
 		button_i = ((alteredPort>>i)+1)%2; /* Move value to the right then increment by one then take the modulo to check whether button is active */
 		/* button_i ACTIVE HIGH */
+		buttons_active += button_i; /* Count the number of active notes */
 		if(button_i){/* a key has been pressed */
 			TR2 = 1;		/* Run timer2 if a button is set */
 			j = i-1; /* Normalize for pointing to an array */
@@ -64,117 +70,51 @@ void PORT1_TO_PLAY_TONE(void){
 				j = j+7; /* Adjust j so it will point to the sharp of the note */
 			}
 			tone = octave_Adjust(octave, j);
-			set_Tone(tone);
+			set_Tone(tone, j);
+			
+		}else{ /* if button has not been pressed */
+			set_Tone(0, j); /* Turn off note... This sets the d_theta to 0. We can therefore check the d_thetas for whether a note is being played */
+			theta[j] = 0;		/* Reset theta position */
 		}
 	}
+	num_active_keys = buttons_active; /* list the number of active buttons */
 }
 
-
-
-void PB_to_select_Tone(void){
-	char tone_select = 0;
-	char i;
-	if(~P1){
-		for(i = 1; i<8; i++){
-			switch(i){	/* Switch between tones */
-				case 1: /* C */
-					if(~PB2){
-						TR2 = 1; /* Turn on Timer2 */
-						tone_select = 0;
-						if(~PB1){ /* if PB1 is pushed, we'll adjust the tone to a sharp  */
-							tone_select = 1; /* C# */
-							}
-						}
-				break;
-
-			
-				case 2: /* D */
-					if(~PB3){
-						TR2 = 1; /* Turn on Timer2 */
-						tone_select = 2;
-						if(~PB1){ /* if PB1 is pushed, we'll adjust the tone to a sharp  */
-							tone_select = 3; /* C# */
-							}
-						}
-				break;
-
-			
-				case 3: /* E (note:- E# is F so no need to check PB1) */
-					if(~PB4){
-						TR2 = 1; /* Turn on Timer2 */
-						tone_select = 4;
-						}
-				break;
-
-				case 4: /* F */
-					if(~PB5){
-						TR2 = 1; /* Turn on Timer2 */
-						tone_select = 5;
-						if(~PB1){ /* if PB1 is pushed, we'll adjust the tone to a sharp  */
-							tone_select = 6; /* F# */
-							}
-						}
-				break;
-
-				case 5: /* G */
-					if(~PB6){
-						TR2 = 1; /* Turn on Timer2 */
-						tone_select = 7;
-						if(~PB1){ /* if PB1 is pushed, we'll adjust the tone to a sharp  */
-							tone_select = 8; /* G# */
-							}
-						}
-				break;
-
-				case 6: /* A */
-					if(~PB7){
-						TR2 = 1; /* Turn on Timer2 */
-						tone_select = 9;
-						if(~PB1){ /* if PB1 is pushed, we'll adjust the tone to a sharp  */
-							tone_select = 10; /* A# */
-							}
-						}
-				break;
-
-				case 7: /* B (note:- B# is C so no need to check PB1)  */
-					if(~PB8){
-						TR2 = 1; /* Turn on Timer2 */
-						tone_select = 11;
-						}
-				break;
-
-
-
-				default:
-				break;
-			}
+unsigned short octave_Adjust(unsigned char OCT, unsigned char piano_key_select)
+{		
+		char move = OCT - DEFAULT_OCTAVE;
+		unsigned short altered_FREQ = tone[piano_key_select];
+		
+		if(move>0){
+			altered_FREQ = altered_FREQ<<(move); /* multiply by 2^move */
+		}else if(move<0){
+			move = -move; /* make move positive */
+			altered_FREQ = altered_FREQ>>(move); /* divide by 2^move */
 		}
-
-		set_Tone(octave_Adjust(octave,tone_select)); /* Set tone as directed by push buttons */
-	} else {
-		//TR2 = 0; /* Turn off Timer2 */
-		Dtheta = 0;
-	}
-	
+		
+    return(altered_FREQ);
 }
 
+unsigned char	combinded_Sine(void){
+	unsigned char i,j; 
+	unsigned short sine_combined = 0; /* The combined value of the notes */
+	for(i = 0; i< NUM_NOTES; i++){
+		j = (unsigned char)((theta[i]&0xFF00)>>8);
+		sine_combined += sin[j];					/* Add fader control here */
+		theta[i] = theta[i] + d_theta[i]; /* Increment theta */
+	}
+	return((unsigned char)(sine_combined/num_active_keys)); /* Return the new DAC Value */
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-void UpdateDisplay()
+void set_Tone(unsigned short frequency, unsigned char note_select)
 {
-	//I feel this is a good opportunity to use the LEDs and LCD to display whatever information we feel necessary. As such, I've left this method open
-	//to whatever you feel we need to use. It can be called inside Check Input
+    d_theta[note_select] = frequency;
+}
+
+
+void UpdateLEDS()
+{
+	P2 = ~P1; /* Invert Port1 and display it on P2 leds */
 }
 
 

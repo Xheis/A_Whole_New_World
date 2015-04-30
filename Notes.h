@@ -26,26 +26,25 @@
 */
 
 
-#include <string.h>
-
-
 
 /*    Definitions    */
-#define  	WAVE_RESOLUTION    256   	// Our 256bit sine wave resolution
-#define   MAX_VOLUME        16    	// 16 different volumes
-#define 	SINE_OFFSET     128 		// DC offset for sin wave
-#define 	DEFAULT_OCTAVE	4
-#define 	MAX_NUM_NOTES		7
+#define  	WAVE_RESOLUTION    	256   	// Our 256bit sine wave resolution
+#define   MAX_VOLUME        	16    	// 16 different volumes
+#define   MAX_FADER      			255    	// 256 different fading volumes
+#define 	SINE_OFFSET     		128 		// DC offset for sin wave
+#define 	DEFAULT_OCTAVE			4
+#define 	DEFAULT_VOLUME			4				// Defualt volume. 0-15. 0=> mute
+
 
 
 /*    Global Variables        */
-unsigned  int    data    theta = 0;		
-
-
-/* Variable for moving through the 8-bit sine wave */
-unsigned char    data     volume = 	15; 	/* Volume 0-15. 0=> mute, 15=> max */
-unsigned char    data    octave = 	7; 	/* Set inital octave to 4 */
-
+unsigned  char    data    theta[NUM_NOTES] = {0};		
+volatile unsigned short d_theta[NUM_NOTES] = {0};		//Our d_theta variable does...
+unsigned char 	data 		num_active_keys = 0; /* The number of keys which are currently being pressed */
+unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=> max */
+unsigned char   data    octave = 	DEFAULT_OCTAVE; 	/* Set inital octave */
+unsigned char 	data 		fader[NUM_NOTES] = {MAX_FADER};
+unsigned char 	data 		fader_flag[NUM_NOTES] = {0};		/* this is for reseting the fader 0=>fader has been reset. 1=> fader is currently running */
 
 
 /*	Tones and their frequencies		C		 D		E		 F	  G		 A		B	 	 C#	  D#   E   F#   G#   A#    B			*/
@@ -66,14 +65,14 @@ const unsigned char	code delay_LB[] = {
 																		#include "delay_LB.csv"
 };
 								
-volatile unsigned short Dtheta;		//Our Dtheta variable does...
 
-void set_Tone(unsigned short);
-unsigned short octave_Adjust(unsigned char, unsigned short);
+
+
 void DAC_Init();
 void Timer_Init();
 void Voltage_Reference_Init();
 void DAC_Sine_Wave();
+void DAC_Multi_Sine_Wave();
 void Set_Volume(unsigned char);
 
 /*		Voltage_Reference_Init	*/
@@ -195,7 +194,7 @@ void Timer2_ISR (void) interrupt 5
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         DAC_Sine_Wave
 
-        Description:      Produces a simple sine wave based on the volume, theta, and Dtheta values.
+        Description:      Produces a simple sine wave based on the volume, theta, and d_theta values.
 
         Revisions:
 
@@ -204,43 +203,16 @@ void Timer2_ISR (void) interrupt 5
 void DAC_Sine_Wave(void){
     unsigned char i = (unsigned char)((theta&0xFF00)>>8);
     DAC0H = SINE_OFFSET + volume*(sin[i])/MAX_VOLUME;        /*    Update the voltage in the DAC    */
-    theta = theta + Dtheta;    /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
-}
-
-void	theta_Manager(void){
-	unsigned char i; 
-	unsigned char num_buttons_pushed = 0, 
-	unsigned char alteredPort;
-	alteredPort = P1&0xFE; /* disregard pushbutton 1 */
-	for(i = 0; i<8; i++){
-		num_buttons_pushed += ((alteredPort>>i)+1)%2; /* Move value to the right then increment by one then take the modulo */
-		/* This will increment num_buttons_pushed*/
-		/* Push buttons are 0 if active.  */
-	}
-	
-	
-	
-	
+    theta = theta + d_theta;    /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
 }
 
 
-void	theta_Manager(void){
-	unsigned char i; 
-	unsigned char num_buttons_pushed = 0, 
-	unsigned char alteredPort;
-	unsigned short notes[12]={0};
-	
-	alteredPort = P1&0xFE; /* disregard pushbutton 1 */
-	for(i = 0; i<8; i++){
-		num_buttons_pushed += ((alteredPort>>i)+1)%2; /* Move value to the right then increment by one then take the modulo */
-		/* This will increment num_buttons_pushed*/
-		/* Push buttons are 0 if active.  */
-	}
-	
-	
-	
-	
+void DAC_Multi_Sine_Wave(void){
+    DAC0H = SINE_OFFSET + volume*combinded_Sine()/MAX_VOLUME;        /*    Update the voltage in the DAC    */
+        /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
 }
+
+
 
 /*		Set_Volume				*/
 	
@@ -261,27 +233,18 @@ void	theta_Manager(void){
 }
 
 
-unsigned short octave_Adjust(unsigned char OCT, unsigned char piano_key_select)
-{		
-		char move = OCT - DEFAULT_OCTAVE;
-		unsigned short altered_FREQ = tone[piano_key_select];
+void delay(unsigned short delay_len){
+	unsigned char num_Run, i;
+	num_Run = (delay_len&0xFF00)>>8; /* Number of times to run 8 bit delay */
+	for (i=0; i<num_Run; i++){
 		
-		if(move>0){
-			altered_FREQ = altered_FREQ<<(move); /* multiply by 2^move */
-		}else if(move<0){
-			move = -move; /* make move positive */
-			altered_FREQ = altered_FREQ>>(move); /* divide by 2^move */
-		}
-		
-    return(altered_FREQ);
-}
 
-void set_Tone(unsigned short i)
-{
-    Dtheta = i;
-}
 
-void delay(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
+
+
+}	
+
+void delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
 	if(delay_len==0){	/* Just to double check that we havent called a delay which doesnt exsist */
 		delay_len++;
 	}
@@ -291,7 +254,7 @@ void delay(unsigned char delay_len){ /* a millisecond delay - caution CPU can do
 	}
 	TL1 = delay_LB[delay_len];	/* Set lowbyte 										*/
   TH1 = delay_HB[delay_len];	/* Set highbyte 									*/
-	TF = 0;											/* Clear Timer1 Flag 							*/
+	TF1 = 0;											/* Clear Timer1 Flag 							*/
 	TR1 = 1; 										/* Turn on Timer1 								*/
 	while(~TF1);								/* wait till timer flag is set 		*/
 	TR1 = 0; 										/* Turn off Timer1 								*/
