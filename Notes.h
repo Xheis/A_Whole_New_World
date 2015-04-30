@@ -38,7 +38,7 @@
 
 
 /*    Global Variables        */
-unsigned  short   	    theta[NUM_NOTES] = {0};		
+volatile unsigned  short   	    theta[NUM_NOTES] = {0};		
 volatile unsigned short d_theta[NUM_NOTES] = {0};		//Our d_theta variable does...
 unsigned char 	data 		num_active_keys = 0; /* The number of keys which are currently being pressed */
 unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=> max */

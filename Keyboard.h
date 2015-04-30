@@ -70,9 +70,10 @@ void PORT1_TO_PLAY_TONE(void){
 		/* button_i ACTIVE HIGH */
 		buttons_active += button_i; /* Count the number of active notes */
 		
+		j = i-1; /* Normalize for pointing to an array */
 		if(button_i){/* a key has been pressed */
 			TR2 = 1;		/* Run timer2 if a button is set */
-			j = i-1; /* Normalize for pointing to an array */
+			
 			
 			if(~PB1){
 				j = j+7; /* Adjust j so it will point to the sharp of the note */
