@@ -242,7 +242,7 @@ void delay(unsigned short delay_len){
 	unsigned char num_Run, i;
 	num_Run = (delay_len&0xFF00)>>8; /* Number of times to run 8 bit delay */
 	for (i=0; i<num_Run; i++){
-		delay_run(255);
+		delay_run(64);
 	}
 	delay_run(delay_len&0x00FF); /* Run the remainder of the delay */
 
@@ -253,8 +253,8 @@ void delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU ca
 		delay_len++;
 	}
 	delay_len--;	/* Decrement delay_len so it points to the correct array pointer to value */
-	if(delay_len>254){/* there are only 255 elements to array goes from  0 - to 254 */
-		delay_len = 254;
+	if(delay_len>63){/* there are only 255 elements to array goes from  0 - to 254 */
+		delay_len = 63;
 	}
 	TL1 = delay_LB[delay_len];	/* Set lowbyte 										*/
   TH1 = delay_HB[delay_len];	/* Set highbyte 									*/
