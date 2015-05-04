@@ -619,3 +619,80 @@ void DAC_Multi_Sine_Wave(void){
 
 
 
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         Display_Volume
+
+        Description:      This is our interupt method that determines the wave(s) that are generated through the DAC
+
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
+void Display_Volume()
+{
+	//Make LED 5,6,7 & 8 display the volume
+	//	MSB=LED5;LSB=LED8
+	unsigned char	tempScore = volume;
+	tempScore = mirror_binary(tempScore);
+	tempScore = (0x0f&tempScore);
+	P2 = P2 | tempScore;
+}
+
+//unsigned char mirror_binary(unsigned char num){
+//	char i;
+//	unsigned char temp = 0;
+
+//	for(i=0; i<8; i++){
+//		temp += (((num>>i)&0x01)<<(7-i));
+//	}
+
+//	return(temp);
+//}
+
+
+
+
+
+
+
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         Change_Volume
+
+        Description:      Sets the Volume whilst in game menu
+
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
+void Change_Volume()
+{
+	if (~PB1)
+	{
+		delay(25);
+		while (~PB1);
+		if (volume < 15)
+		{
+			volume+=1;
+		}
+	}
+	else if (~PB2)
+	{
+		delay(25);
+		while (~PB2);
+		if (volume > 0)
+		{
+			volume-=1;
+		}
+	}
+}
+
+
+
+
+
+
+

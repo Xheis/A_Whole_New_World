@@ -67,10 +67,8 @@ void main(void)
 			{
 				case 0: /* Volume Menu */
 					//Code here
-					LD7 = 0;
-					delay(250);
-					delay(250);
-					LD6 = ~LD6;
+					Change_Volume();
+					Display_Volume();
 					break;
 				case 1: /* Play Menu */
 					PORT1_TO_PLAY_TONE();

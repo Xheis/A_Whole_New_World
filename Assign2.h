@@ -46,6 +46,8 @@ sbit LD8 = P2 ^ 7;                         // LED LD8
 void main(void);
 void General_Init(void);
 void Check_State_Change(void);
+void Change_Volume(void);
+void Display_Volume(void);
 
 #endif    
 
