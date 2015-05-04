@@ -17,18 +17,27 @@
         Revisions:		v0.1 Alpha
 
 _____________________________________________________________________________________________________________________*/
-#include "c8051F120.h"	//<SiLABS/C8051F120.h>
+
+
+//--------------------------------------------------------------------------------------------------------------------
+//                              Declarations
+//--------------------------------------------------------------------------------------------------------------------
+
+#include "c8051F120.h"	
 #include "Assign2.h"
 #include "Methods.c"
-
-//#include "Notes.h"
-//#include "Keyboard.h"
-//#include "LCD.h"
 
 
 /* Variables */
 unsigned char gameState = 1;		/* Used for switching to and from the volume and play states	*/
 int debugcounter=0;
+
+
+//--------------------------------------------------------------------------------------------------------------------
+//                              Abstract & Menu Methods
+//--------------------------------------------------------------------------------------------------------------------
+
+
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Main
 
@@ -49,6 +58,7 @@ void main(void)
 
 	LD5 = 0;
 	while(1)
+<<<<<<< HEAD
 	{
 		TR2 = 0;
 		delay(500);
@@ -76,7 +86,35 @@ void main(void)
 //	{	
 //		debugcounter +=1;
 //	}
+=======
+	{	
+			//Allow user to change current gamestate. i.e. menu or playing
+			Check_State_Change();
+			
+			//Execute the current state chosen
+			switch (gameState)
+			{
+				case 0: /* Volume Menu */
+					//Code here
+					Change_Volume();
+					Display_Volume();
+					break;
+				case 1: /* Play Menu */
+					PORT1_TO_PLAY_TONE();
+					break;
+			}
+		}
+		
+		//This is a debug counter that should never, EVER execute. So, delete it when you have no issues at the end.
+		while(1)
+		{	
+			debugcounter +=1;
+		}
+>>>>>>> origin/master
 }
+
+
+
 
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         General_Init
@@ -97,10 +135,14 @@ void General_Init()
 
 
 
+
+
+
+
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Check_State_Change
 
-        Description:      Initialise ports, watchdog....
+        Description:      Check the MPB state, and see if user wants to change state
 
         Revisions:
 

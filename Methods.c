@@ -9,6 +9,13 @@
 -----------------------------------------------------------------------------
 */
 
+
+
+//--------------------------------------------------------------------------------------------------------------------
+//                              Declarations
+//--------------------------------------------------------------------------------------------------------------------
+
+
 #include "Methods.h"
 
 /*    Definitions    */
@@ -19,11 +26,10 @@
 #define 	DEFAULT_OCTAVE			7
 #define 	DEFAULT_VOLUME			15			// Defualt volume. 0-15. 0=> mute
 #define		NUM_NOTES						14
-#define		NUM_NOTES		14
 
 
 /*    Global Variables        */
-volatile unsigned  short   	    theta[NUM_NOTES] = {0};		
+volatile unsigned short theta[NUM_NOTES] = {0};		
 volatile unsigned short d_theta[NUM_NOTES] = {0};		//Our d_theta variable does...
 unsigned char 	data 		num_active_keys = 0; /* The number of keys which are currently being pressed */
 unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=> max */
@@ -31,9 +37,14 @@ unsigned char   data    octave = 	DEFAULT_OCTAVE; 	/* Set inital octave */
 unsigned char 	data 		fader[NUM_NOTES] = {MAX_FADER};
 unsigned char 	data 		fader_flag[NUM_NOTES] = {0};		/* this is for reseting the fader 0=>fader has been reset. 1=> fader is currently running */
 
-/*	Tones and their frequencies		C		 D		E		 F	  G		 A		B	 	 C#	  D#   E   F#   G#   A#    B			*/
+
+
+/*	Specific Tones and their frequencies		C		 D		E		 F	  G		 A		B	 	 C#	  D#   E   F#   G#   A#    B			*/
 unsigned short	 code	tone[]	=	{262,	294, 330,	349, 392,	440, 494, 277, 311, 330, 370, 415, 466, 494};
 
+
+
+/* 	Arrays		*/
 const char    code    sin[] = { 
                                     /* DAC voltages for 8-bit, 16 volume sine wave */
                                     /* ------------------------------------------------------------------------ */
@@ -52,6 +63,13 @@ const unsigned char	code delay_LB[] = {
 
 
 
+
+
+//--------------------------------------------------------------------------------------------------------------------
+//                              Functions & Methods
+//--------------------------------------------------------------------------------------------------------------------
+
+
 /*		Voltage_Reference_Init	*/
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Voltage_Reference_Init
@@ -68,6 +86,18 @@ void Voltage_Reference_Init()
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 /*		Oscillator_Init			*/
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Oscillator_Init
@@ -82,6 +112,14 @@ void Oscillator_Init()
 		SFRPAGE   = CONFIG_PAGE;
     OSCICN    = 0x83;
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -117,6 +155,12 @@ void Timer_Init()
 
 
 
+
+
+
+
+
+
 /*		DAC_Init				*/
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         DAC_Init
@@ -135,6 +179,18 @@ void DAC_Init()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 /*		Interrupts_Init			*/
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Interrupts_Init
@@ -148,6 +204,19 @@ void Interrupts_Init()
 {
     IE        = 0xA0;  // Global enable interrupt + timer 2 interrupt
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -168,6 +237,15 @@ void Timer2_ISR (void) interrupt 5
     TF2 = 0;        // Reset Interrupt
 
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -194,6 +272,12 @@ void Timer2_ISR (void) interrupt 5
 
 
 
+
+
+
+
+
+
 /*		Set_Volume				*/
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Set_Volume
@@ -209,6 +293,14 @@ void Timer2_ISR (void) interrupt 5
     }
     volume = i;
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -246,6 +338,26 @@ void delay(unsigned short delay_len){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/*		delay_run			*/
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         delay_run
+
+        Description:      When called with a delay parameter in miliseconds, this will freeze the CPU for that amount of time.
+
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
 unsigned char delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
 	unsigned char state = getState();
 	if(delay_len==0){	/* Just to double check that we havent called a delay which doesnt exsist */
@@ -280,6 +392,26 @@ unsigned char delay_run(unsigned char delay_len){ /* a millisecond delay - cauti
 	return(0);
 }
 		
+
+
+
+
+
+
+
+
+
+
+
+/*		mirror_binary			*/
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         mirror_binary
+
+        Description:      Used to mirror the byte used for the LEDs on the Perif. Board.
+													i.e. LED8 becomes the MSB, whereas it is usually the LSB
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
 unsigned char mirror_binary(unsigned char num){
 	char i;
 	unsigned char temp = 0;
@@ -291,6 +423,26 @@ unsigned char mirror_binary(unsigned char num){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/*		PORT1_TO_PLAY_TONE			*/
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         PORT1_TO_PLAY_TONE
+
+        Description:      This is our main input handling function that is looped in the gameloop.
+													It handles all PORT1 inputs (i.e. Notes)
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
 void PORT1_TO_PLAY_TONE(void){
 	unsigned char alteredPort;
 	unsigned char button_i;
@@ -313,7 +465,14 @@ void PORT1_TO_PLAY_TONE(void){
 			
 			
 			if(~PB1){
+				set_Tone(0, j); /* Turn off note... This sets the d_theta to 0. We can therefore check the d_thetas for whether a note is being played */
+				theta[j] = 0;
 				j = j+7; /* Adjust j so it will point to the sharp of the note */
+			}
+			else
+			{
+				set_Tone(0, j+7); /* Turn off note... This sets the d_theta to 0. We can therefore check the d_thetas for whether a note is being played */
+				theta[j+7] = 0;		/* Reset theta position */
 			}
 			
 			tone = octave_Adjust(octave, j);
@@ -322,6 +481,10 @@ void PORT1_TO_PLAY_TONE(void){
 		}else{ /* if button has not been pressed */
 			set_Tone(0, j); /* Turn off note... This sets the d_theta to 0. We can therefore check the d_thetas for whether a note is being played */
 			theta[j] = 0;		/* Reset theta position */
+			//We also want to reset the sharp buttons
+			set_Tone(0, j+7); /* Turn off note... This sets the d_theta to 0. We can therefore check the d_thetas for whether a note is being played */
+			theta[j+7] = 0;		/* Reset theta position */
+			
 		}
 	}
 	num_active_keys = buttons_active; /* list the number of active buttons */
@@ -334,6 +497,17 @@ void PORT1_TO_PLAY_TONE(void){
 
 
 
+
+
+/*		octave_Adjust			*/
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         octave_Adjust
+
+        Description:      octave_Adjust allows us to choose both an Octave and key, and will return Dtheta(i) for the
+													correct value. This is used every key.
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
 unsigned short octave_Adjust(unsigned char OCT, unsigned char piano_key_select)
 {		
 		char move = OCT - DEFAULT_OCTAVE;
@@ -348,6 +522,14 @@ unsigned short octave_Adjust(unsigned char OCT, unsigned char piano_key_select)
 		
     return(altered_FREQ);
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -422,6 +604,10 @@ void UpdateLEDS()
 
 
 
+
+
+
+
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         DAC_Multi_Sine_Wave
 
@@ -434,6 +620,83 @@ void DAC_Multi_Sine_Wave(void){
     DAC0H = SINE_OFFSET + volume*combined_Sine()/MAX_VOLUME;        /*    Update the voltage in the DAC    */
         /* Due to sine wave being 8 bit, the char overflow will bring state back to 0 */
 }
+
+
+
+
+
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         Display_Volume
+
+        Description:      This is our interupt method that determines the wave(s) that are generated through the DAC
+
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
+void Display_Volume()
+{
+	//Make LED 5,6,7 & 8 display the volume
+	//	MSB=LED5;LSB=LED8
+	unsigned char	tempScore = volume;
+	tempScore = mirror_binary(tempScore);
+	tempScore = (0x0f&tempScore);
+	P2 = P2 | tempScore;
+}
+
+//unsigned char mirror_binary(unsigned char num){
+//	char i;
+//	unsigned char temp = 0;
+
+//	for(i=0; i<8; i++){
+//		temp += (((num>>i)&0x01)<<(7-i));
+//	}
+
+//	return(temp);
+//}
+
+
+
+
+
+
+
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         Change_Volume
+
+        Description:      Sets the Volume whilst in game menu
+
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
+void Change_Volume()
+{
+	if (~PB1)
+	{
+		delay(25);
+		while (~PB1);
+		if (volume < 15)
+		{
+			volume+=1;
+		}
+	}
+	else if (~PB2)
+	{
+		delay(25);
+		while (~PB2);
+		if (volume > 0)
+		{
+			volume-=1;
+		}
+	}
+}
+
+
 
 
 
