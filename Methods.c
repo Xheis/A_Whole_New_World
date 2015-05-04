@@ -24,7 +24,7 @@
 #define   MAX_FADER      			255    	// 256 different fading volumes
 #define 	SINE_OFFSET     		128 		// DC offset for sin wave
 #define 	DEFAULT_OCTAVE			7
-#define 	DEFAULT_VOLUME			15			// Defualt volume. 0-15. 0=> mute
+#define 	DEFAULT_VOLUME			7			// Defualt volume. 0-15. 0=> mute
 #define		NUM_NOTES						14
 
 
@@ -642,8 +642,8 @@ void Display_Volume()
 	//	MSB=LED5;LSB=LED8
 	unsigned char	tempScore = volume;
 	tempScore = mirror_binary(tempScore);
-	tempScore = (0x0f&tempScore);
-	P2 = P2 | tempScore;
+	tempScore = (tempScore);
+	P2 = tempScore;
 }
 
 //unsigned char mirror_binary(unsigned char num){

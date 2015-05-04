@@ -56,45 +56,17 @@ void main(void)
 	DAC_Init();
 	Interrupts_Init();
 
-	LD5 = 0;
 	while(1)
-	{
-		TR2 = 0;
-		delay(500);
-		LD6 = ~LD6;
-	}
-	
-//	{	
-//		Check_State_Change();
-//		switch (gameState) /* Decide which state we are in */
-//		{
-//			case 0: /* Volume Menu */
-//				//Code here
-//				LD7 = 0;
-//				delay(250);
-//				delay(250);
-//				LD6 = ~LD6;
-//				break;
-//			case 1: /* Play Menu */
-//				PORT1_TO_PLAY_TONE();
-//				break;
-//		}
-//	}
-//	
-//	while(1)
-//	{	
-//		debugcounter +=1;
-//	}
-
 	{	
 			//Allow user to change current gamestate. i.e. menu or playing
-			Check_State_Change();
+		Check_State_Change();																											//STILL NEEDED AS OF 5:41PM 4/5/15
 			
 			//Execute the current state chosen
 			switch (gameState)
 			{
 				case 0: /* Volume Menu */
-					//Code here
+					//Clear any previous visuals
+					P2 = 0x00;
 					Change_Volume();
 					Display_Volume();
 					break;
