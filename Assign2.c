@@ -19,8 +19,10 @@
 _____________________________________________________________________________________________________________________*/
 #include "c8051F120.h"	//<SiLABS/C8051F120.h>
 #include "Assign2.h"
-#include "Notes.h"
-#include "Keyboard.h"
+#include "Methods.c"
+
+//#include "Notes.h"
+//#include "Keyboard.h"
 //#include "LCD.h"
 
 
@@ -45,9 +47,12 @@ void main(void)
 	DAC_Init();
 	Interrupts_Init();
 
+	LD5 = 0;
 	while(1)
+	{
 		delay(500);
 		LD6 = ~LD6;
+	}
 	
 //	{	
 //		Check_State_Change();
