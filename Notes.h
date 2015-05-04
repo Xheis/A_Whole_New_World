@@ -1,5 +1,5 @@
-#ifndef Notes
-#define Notes
+#ifndef NOTES_H
+#define NOTES_H
 /*
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
@@ -33,8 +33,11 @@
 #define   MAX_FADER      			255    	// 256 different fading volumes
 #define 	SINE_OFFSET     		128 		// DC offset for sin wave
 #define 	DEFAULT_OCTAVE			7
-#define 	DEFAULT_VOLUME			15				// Defualt volume. 0-15. 0=> mute
-#define		NUM_NOTES		14
+#define 	DEFAULT_VOLUME			15			// Defualt volume. 0-15. 0=> mute
+#define		NUM_NOTES						14
+
+/*  Structs							*/ 
+
 
 
 /*    Global Variables        */
@@ -45,7 +48,7 @@ unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=
 unsigned char   data    octave = 	DEFAULT_OCTAVE; 	/* Set inital octave */
 unsigned char 	data 		fader[NUM_NOTES] = {MAX_FADER};
 unsigned char 	data 		fader_flag[NUM_NOTES] = {0};		/* this is for reseting the fader 0=>fader has been reset. 1=> fader is currently running */
-
+sbit 	exit_delay = 0;				/* Used for exiting the delay loop */
 
 /*	Tones and their frequencies		C		 D		E		 F	  G		 A		B	 	 C#	  D#   E   F#   G#   A#    B			*/
 unsigned short	 code	tone[]	=	{262,	294, 330,	349, 392,	440, 494, 277, 311, 330, 370, 415, 466, 494};
@@ -240,31 +243,56 @@ void DAC_Sine_Wave(void){
 
 void delay(unsigned short delay_len){
 	unsigned char num_Run, i;
-	num_Run = (delay_len&0xFF00)>>8; /* Number of times to run 8 bit delay */
+	num_Run = (delay_len&0xFF40)>>6; /* Number of times to run 8 bit delay */
 	for (i=0; i<num_Run; i++){
 		delay_run(64);
+		if(exit_delay){
+			break;
+		}
 	}
-	delay_run(delay_len&0x00FF); /* Run the remainder of the delay */
-
+	
+	if(~exit_delay){ /* Only run remainder of the dealy if the exit bit has not been set */
+		delay_run(delay_len&0x00FF); /* Run the remainder of the delay */
+	}
+	exit_delay = 0;		/* Clear the exit bit for next entry */
 }	
+
+
+
+
 
 void delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
 	if(delay_len==0){	/* Just to double check that we havent called a delay which doesnt exsist */
 		delay_len++;
 	}
 	delay_len--;	/* Decrement delay_len so it points to the correct array pointer to value */
-	if(delay_len>63){/* there are only 255 elements to array goes from  0 - to 254 */
+	if(delay_len>63){/* there are only 64 elements to array goes from  0 - to 63 */
 		delay_len = 63;
 	}
-	TL1 = delay_LB[delay_len];	/* Set lowbyte 										*/
-  TH1 = delay_HB[delay_len];	/* Set highbyte 									*/
-	TF1 = 0;											/* Clear Timer1 Flag 							*/
-	TR1 = 1; 										/* Turn on Timer1 								*/
-	while(~TF1);								/* wait till timer flag is set 		*/
+	TL1 = delay_LB[delay_len];	/* Set lowbyte 												*/
+  TH1 = delay_HB[delay_len];	/* Set highbyte 											*/
+	TF1 = 0;										/* Clear Timer1 Flag	 								*/
+	TR1 = 1; 										/* Turn on Timer1 										*/
+	
+	while(~TF1){								/* wait till timer flag is set 				*/
+															/* Checks to do during the delay	 		*/
+		
+		if(~MPB){									/* If Motherboard Push button is pressed */
+			while(~MPB);						/* Wait till button is released */
+			exit_delay = 1;					/* Exit delay */			
+		}
+	}
 	TR1 = 0; 										/* Turn off Timer1 								*/
 }
 		
-
+unsigned char mirror_binary(unsigned char num){
+	char i;
+	unsigned char temp = 0;
+	for(i=0; i<8; i++;){
+		temp += (((num>>i)&0x01)<<(7-i));
+	}
+	return(temp);
+}
 
 
 
