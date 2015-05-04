@@ -46,27 +46,30 @@ void main(void)
 	Interrupts_Init();
 
 	while(1)
-	{	
-		Check_State_Change();
-		switch (gameState) /* Decide which state we are in */
-		{
-			case 0: /* Volume Menu */
-				//Code here
-				LD7 = 0;
-				delay(250);
-				delay(250);
-				LD6 = ~LD6;
-				break;
-			case 1: /* Play Menu */
-				PORT1_TO_PLAY_TONE();
-				break;
-		}
-	}
+		delay(500);
+		LD6 = ~LD6;
 	
-	while(1)
-	{	
-		debugcounter +=1;
-	}
+//	{	
+//		Check_State_Change();
+//		switch (gameState) /* Decide which state we are in */
+//		{
+//			case 0: /* Volume Menu */
+//				//Code here
+//				LD7 = 0;
+//				delay(250);
+//				delay(250);
+//				LD6 = ~LD6;
+//				break;
+//			case 1: /* Play Menu */
+//				PORT1_TO_PLAY_TONE();
+//				break;
+//		}
+//	}
+//	
+//	while(1)
+//	{	
+//		debugcounter +=1;
+//	}
 }
 
 /*--------------------------------------------------------------------------------------------------------------------

@@ -36,7 +36,7 @@
 #define 	DEFAULT_VOLUME			15			// Defualt volume. 0-15. 0=> mute
 #define		NUM_NOTES						14
 
-/*  Structs							*/ 
+
 
 
 
@@ -48,7 +48,7 @@ unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=
 unsigned char   data    octave = 	DEFAULT_OCTAVE; 	/* Set inital octave */
 unsigned char 	data 		fader[NUM_NOTES] = {MAX_FADER};
 unsigned char 	data 		fader_flag[NUM_NOTES] = {0};		/* this is for reseting the fader 0=>fader has been reset. 1=> fader is currently running */
-sbit 	exit_delay = 0;				/* Used for exiting the delay loop */
+
 
 /*	Tones and their frequencies		C		 D		E		 F	  G		 A		B	 	 C#	  D#   E   F#   G#   A#    B			*/
 unsigned short	 code	tone[]	=	{262,	294, 330,	349, 392,	440, 494, 277, 311, 330, 370, 415, 466, 494};
@@ -77,7 +77,7 @@ void Voltage_Reference_Init();
 void DAC_Sine_Wave();
 void DAC_Multi_Sine_Wave();
 void Set_Volume(unsigned char);
-void delay_run(unsigned char);
+unsigned char delay_run(unsigned char);
 void delay(unsigned short);
 
 
@@ -243,25 +243,26 @@ void DAC_Sine_Wave(void){
 
 void delay(unsigned short delay_len){
 	unsigned char num_Run, i;
-	num_Run = (delay_len&0xFF40)>>6; /* Number of times to run 8 bit delay */
-	for (i=0; i<num_Run; i++){
-		delay_run(64);
+	unsigned char exit_delay = 0;
+	num_Run = (delay_len&0xFF40)>>6; /* Number of times to run 6 bit delay */
+	
+	for (i = 0; i < num_Run; i++){
+		exit_delay = delay_run(64);
 		if(exit_delay){
 			break;
 		}
 	}
 	
-	if(~exit_delay){ /* Only run remainder of the dealy if the exit bit has not been set */
+	if(!exit_delay){ /* Only run remainder of the delay if exit has not been called */
 		delay_run(delay_len&0x00FF); /* Run the remainder of the delay */
 	}
-	exit_delay = 0;		/* Clear the exit bit for next entry */
 }	
 
 
 
 
 
-void delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
+unsigned char delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
 	if(delay_len==0){	/* Just to double check that we havent called a delay which doesnt exsist */
 		delay_len++;
 	}
@@ -279,16 +280,17 @@ void delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU ca
 		
 		if(~MPB){									/* If Motherboard Push button is pressed */
 			while(~MPB);						/* Wait till button is released */
-			exit_delay = 1;					/* Exit delay */			
+			return(0);							/* Exit delay 0=> stop delay*/			
 		}
 	}
 	TR1 = 0; 										/* Turn off Timer1 								*/
+	return(1);
 }
 		
 unsigned char mirror_binary(unsigned char num){
 	char i;
 	unsigned char temp = 0;
-	for(i=0; i<8; i++;){
+	for(i=0; i<8; i++){
 		temp += (((num>>i)&0x01)<<(7-i));
 	}
 	return(temp);
