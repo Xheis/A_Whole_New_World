@@ -58,7 +58,6 @@ void main(void)
 
 	LD5 = 0;
 	while(1)
-<<<<<<< HEAD
 	{
 		TR2 = 0;
 		delay(500);
@@ -86,7 +85,7 @@ void main(void)
 //	{	
 //		debugcounter +=1;
 //	}
-=======
+
 	{	
 			//Allow user to change current gamestate. i.e. menu or playing
 			Check_State_Change();
@@ -110,7 +109,7 @@ void main(void)
 		{	
 			debugcounter +=1;
 		}
->>>>>>> origin/master
+
 }
 
 

@@ -317,7 +317,7 @@ void Timer2_ISR (void) interrupt 5
 
 --------------------------------------------------------------------------------------------------------------------*/
 void delay(unsigned short delay_len){
-	unsigned char num_Run, i, GS;
+	unsigned char num_Run, i;
 	unsigned char exit_delay = 0;
 	num_Run = (delay_len>>6)&0xFF; /* Number of times to run 6 bit delay */
 	
