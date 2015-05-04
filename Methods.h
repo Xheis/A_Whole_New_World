@@ -21,5 +21,7 @@ void DAC_Multi_Sine_Wave();
 void Set_Volume(unsigned char);
 unsigned char delay_run(unsigned char);
 void delay(unsigned short);
+unsigned char getState(void);
+void setState(unsigned char);
 
 #endif

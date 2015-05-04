@@ -27,7 +27,7 @@ ________________________________________________________________________________
 
 
 /* Variables */
-char gameState = 1;		/* Used for switching to and from the volume and play states	*/
+unsigned char gameState = 1;		/* Used for switching to and from the volume and play states	*/
 int debugcounter=0;
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Main
@@ -50,6 +50,7 @@ void main(void)
 	LD5 = 0;
 	while(1)
 	{
+		TR2 = 0;
 		delay(500);
 		LD6 = ~LD6;
 	}
@@ -118,5 +119,11 @@ void Check_State_Change()
 	}
 }
 
+unsigned char getState(void){
+	
+	return(gameState);
+}
 
-
+void setState(unsigned char temp_state){
+	gameState = temp_state;
+}

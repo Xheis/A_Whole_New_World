@@ -97,20 +97,16 @@ void Oscillator_Init()
 --------------------------------------------------------------------------------------------------------------------*/
 void Timer_Init()
 {
-		SFRPAGE   = TIMER01_PAGE; /* Initialize Timer1 */
+		
+    SFRPAGE   = TIMER01_PAGE;					/* Initialize Timer 1 */
     TCON      = 0x40;
-    TMOD      = 0x20;
-    CKCON     = 0x02;					/* Auto Reload Timer		 */
+    TMOD      = 0x10;
+    CKCON     = 0x02;	
     TL1       = delay_LB[0];
     TH1       = delay_HB[0];
-		
-		TCON      = 0x40;
-    TMOD      = 0x20;
-    CKCON     = 0x02;
-    TL1       = 0x45;
-    TH1       = 0x45;
+
 	
-    SFRPAGE   = TMR2_PAGE;
+    SFRPAGE   = TMR2_PAGE;	/* Timer 2 */
     TMR2CN    = 0x04;
     TMR2CF    = 0x0A;
     RCAP2L    = 0x8A;
@@ -229,9 +225,9 @@ void Timer2_ISR (void) interrupt 5
 
 --------------------------------------------------------------------------------------------------------------------*/
 void delay(unsigned short delay_len){
-	unsigned char num_Run, i;
+	unsigned char num_Run, i, GS;
 	unsigned char exit_delay = 0;
-	num_Run = (delay_len&0xFF40)>>6; /* Number of times to run 6 bit delay */
+	num_Run = (delay_len>>6)&0xFF; /* Number of times to run 6 bit delay */
 	
 	for (i = 0; i < num_Run; i++){
 		exit_delay = delay_run(64);
@@ -241,9 +237,9 @@ void delay(unsigned short delay_len){
 	}
 	
 	if(!exit_delay){ /* Only run remainder of the delay if exit has not been called */
-		delay_run(delay_len&0x00FF); /* Run the remainder of the delay */
+		num_Run = delay_len&0x3F; /* Remainder of milliseconds to run */
+		delay_run(num_Run); /* Run the remainder of the delay */
 	}
-	exit_delay = 0;		/* Clear the exit bit for next entry */
 }	
 
 
@@ -251,13 +247,16 @@ void delay(unsigned short delay_len){
 
 
 unsigned char delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
+	unsigned char state = getState();
 	if(delay_len==0){	/* Just to double check that we havent called a delay which doesnt exsist */
 		delay_len++;
 	}
+	
 	delay_len--;	/* Decrement delay_len so it points to the correct array pointer to value */
 	if(delay_len>63){/* there are only 64 elements to array goes from  0 - to 63 */
 		delay_len = 63;
 	}
+	
 	TL1 = delay_LB[delay_len];	/* Set lowbyte 												*/
   TH1 = delay_HB[delay_len];	/* Set highbyte 											*/
 	TF1 = 0;										/* Clear Timer1 Flag	 								*/
@@ -268,10 +267,17 @@ unsigned char delay_run(unsigned char delay_len){ /* a millisecond delay - cauti
 		
 		if(~MPB){									/* If Motherboard Push button is pressed */
 			while(~MPB);						/* Wait till button is released */
-			return(0);							/* Exit delay 0=> stop delay*/			
+			if(state){
+					state = 0; 					/* Toggle state */
+			}else{
+					state = 1;
+			}
+			setState(state);
+			return(1);							/* Exit delay 1=> stop delay*/			
 		}
 	}
 	TR1 = 0; 										/* Turn off Timer1 								*/
+	return(0);
 }
 		
 unsigned char mirror_binary(unsigned char num){
