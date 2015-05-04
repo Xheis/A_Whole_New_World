@@ -640,10 +640,10 @@ void Display_Volume()
 {
 	//Make LED 5,6,7 & 8 display the volume
 	//	MSB=LED5;LSB=LED8
-	unsigned char	tempScore = volume;
-	tempScore = mirror_binary(tempScore);
-	tempScore = (tempScore);
-	P2 = tempScore;
+	unsigned char	tempVolume = volume;
+	tempVolume = mirror_binary(tempVolume);
+	tempVolume = (0x0F&tempVolume);
+	P2 = tempVolume;
 }
 
 //unsigned char mirror_binary(unsigned char num){
