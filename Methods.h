@@ -23,6 +23,9 @@ unsigned char getState(void);
 void setState(unsigned char);
 void Change_Volume(void);
 void Display_Volume(void);
-
+void reset_Timer_0(void);
+void update_millis(void);
+unsigned short millis(void);
+void millis_RESET(void);
 
 #endif

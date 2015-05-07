@@ -40,6 +40,7 @@ typedef struct{
 
 
 /*    Global Variables        */
+unsigned short milliseconds = 0;
 volatile unsigned short theta[NUM_NOTES] = {0};		
 volatile unsigned short d_theta[NUM_NOTES] = {0};		//Our d_theta variable does...
 unsigned char 	data 		num_active_keys = 0; /* The number of keys which are currently being pressed */
@@ -155,10 +156,7 @@ void Timer_Init()
 		TL1       = delay_LB[0];
     TH1       = delay_HB[0];
 	
-//    TL0       = 0x4C;
-//    TH0       = 0xA0;
-//		TF0 			= 0;
-//		TR0				= 1;
+		reset_Timer_0();
 
 	
     SFRPAGE   = TMR2_PAGE;	/* Timer 2 */
@@ -195,19 +193,6 @@ void DAC_Init()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*		Interrupts_Init			*/
 /*--------------------------------------------------------------------------------------------------------------------
         Function:         Interrupts_Init
@@ -222,7 +207,7 @@ void Interrupts_Init()
 		IE = 0x0; 	/* Clear the register */
 		EA = 1; 		/* Enable global interupts */
 		ET2 = 1;		/* Enable timer2 interrupt */
-		ET0 = 0;		/* Enable timer0 interrupt */
+		ET0 = 1;		/* Enable timer0 interrupt */
 
 }
 
@@ -723,6 +708,29 @@ void Change_Volume()
 
 
 
+
+
+
+/* Interrupt for a millisecond timer */
+void update_millis(void) interrupt 1{
+	milliseconds++;
+	reset_Timer_0();
+}
+
+void reset_Timer_0(void){
+	TF0 			= 0;  /* Clear flag */
+	TL0       = 0x4C;	/* Top up for a 1 millisecond delay */
+  TH0       = 0xA0;
+	TR0 			= 1; 		/* Enable Timer */
+}
+
+unsigned short millis(){
+	return(milliseconds);
+}
+
+void millis_RESET(void){
+	milliseconds = 0;
+}
 
 
 

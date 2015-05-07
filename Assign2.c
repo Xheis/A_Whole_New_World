@@ -32,6 +32,7 @@ ________________________________________________________________________________
 /* Variables */
 unsigned char gameState = 1;		/* Used for switching to and from the volume and play states	*/
 int debugcounter=0;
+unsigned long old_time = 0;
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -67,7 +68,11 @@ void main(void)
 			{
 				case 0: /* Volume Menu */
 					//Clear any previous visuals
-					P2 = 0x00;
+				  
+					if((millis() - old_time)>500){
+							LD1 = ~LD1;
+							old_time = millis();
+					}
 					Change_Volume();
 					Display_Volume();
 					break;
@@ -139,5 +144,6 @@ unsigned char getState(void){
 }
 
 void setState(unsigned char temp_state){
+	P2 = 0; /* Clear port 2 in every state change */
 	gameState = temp_state;
 }
