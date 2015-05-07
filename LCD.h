@@ -31,15 +31,25 @@ void initLCD(void);
 void clearLCD(void);
 void printLCD(unsigned char *);
 void writeLCD(unsigned char );
+void cmdLCD(unsigned char);
 void setCursor(char, char);
 void pulse_Enable(unsigned char);
 
 /* Definitions				*/
-#define FUNCTION_SET 				0x2
-#define	CLR_DISP						0x0
+#define FUNCTION_SET 					0x02
+#define	CLR_DISP						0x1
 #define CONTROL							0xE
-#define ENTRY_MODE_SET			0x6
-#define LCD_SEGMENTS				16
+
+#define TWO_LINE_CONTROL				0x22
+#define SINGLE_LINE_CONTROL				0x20
+#define NEW_LINE						0xC0
+
+#define MOVE_LEFT						0x10
+#define MOVE_RIGHT						0x14
+
+#define ENTRY_MODE_SET					0x6
+#define LCD_SEGMENTS					16
+
 
 sbit DB4 = 				P3 ^ 0;	/* Data bit 4 */
 sbit DB5 = 				P3 ^ 1;	/* Data bit 5 */
@@ -47,7 +57,7 @@ sbit DB6 = 				P3 ^ 2;	/* Data bit 6 */
 sbit DB7 = 				P3 ^ 3;	/* Data bit 7 */
 sbit RS = 				P3 ^ 4;	/* Register select */
 sbit R_W = 				P3 ^ 5;	/* Read/Write */
-sbit ENABLE = 		P3 ^ 6;	/* Enable signal */
+sbit ENABLE = 			P3 ^ 6;	/* Enable signal */
 
 
 #endif

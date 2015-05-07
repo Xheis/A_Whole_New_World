@@ -48,7 +48,7 @@ void printLCD(unsigned char *word){
 		writeLCD(*word++); /* increment pointer to the next character in the word */
 		}	
 	}
-	while(16-fill){
+	for(; fill<16; fill++){
 		writeLCD(' ');
 		}
 
