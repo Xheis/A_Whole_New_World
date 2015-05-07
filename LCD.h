@@ -26,10 +26,21 @@
 */
 
 
-#include <string.h>
+
+/* Function Prototypes */
+void initLCD(void);
+void clearLCD(void);
+void printLCD(unsigned char *);
+void writeLCD(unsigned char );
+void setCursor(char, char);
+void pulse_Enable(unsigned char);
 
 /* Definitions				*/
-#define FUNCTION_SET 0x2
+#define FUNCTION_SET 				0x2
+#define	CLR_DISP						0x0
+#define CONTROL							0xE
+#define ENTRY_MODE_SET			0x6
+#define LCD_SEGMENTS				16
 
 sbit DB4 = 				P3 ^ 0;	/* Data bit 4 */
 sbit DB5 = 				P3 ^ 1;	/* Data bit 5 */
@@ -40,26 +51,4 @@ sbit R_W = 				P3 ^ 5;	/* Read/Write */
 sbit ENABLE = 		P3 ^ 6;	/* Enable signal */
 
 
-
-
-void initLCD(void){
-}
-
-void clearLCD(void){
-}
-
-void appendWriteLCD(char *word){
-	len = sizeof(word);
-	for(char i; i < len; i++){
-		//// something
-	}
-}void appendWriteLCD(char *word){
-	len = sizeof(word);
-	for(char i; i < len; i++){
-		//// something
-	}
-}
-
-
-	
 #endif

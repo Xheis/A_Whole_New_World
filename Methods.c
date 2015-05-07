@@ -18,6 +18,8 @@
 
 #include "Methods.h"
 
+
+
 /*    Definitions    */
 #define  	WAVE_RESOLUTION    	256   	// Our 256bit sine wave resolution
 #define   MAX_VOLUME        	16    	// 16 different volumes
@@ -28,14 +30,23 @@
 #define		NUM_NOTES						14
 
 
+
+/* */
+
+typedef struct{
+	unsigned char on : 1;   /* 1 bit for setting and clearing */
+	unsigned char fad_value;
+}bitbang;
+
+
 /*    Global Variables        */
 volatile unsigned short theta[NUM_NOTES] = {0};		
 volatile unsigned short d_theta[NUM_NOTES] = {0};		//Our d_theta variable does...
 unsigned char 	data 		num_active_keys = 0; /* The number of keys which are currently being pressed */
 unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=> max */
 unsigned char   data    octave = 	DEFAULT_OCTAVE; 	/* Set inital octave */
-unsigned char 	data 		fader[NUM_NOTES] = {MAX_FADER};
-unsigned char 	data 		fader_flag[NUM_NOTES] = {0};		/* this is for reseting the fader 0=>fader has been reset. 1=> fader is currently running */
+bitbang							 		fader[NUM_NOTES] = {0,MAX_FADER};		/* this is for reseting the fader 0=>fader has been reset. 1=> fader is currently running */
+
 
 
 
@@ -136,12 +147,18 @@ void Oscillator_Init()
 void Timer_Init()
 {
 		
-    SFRPAGE   = TIMER01_PAGE;					/* Initialize Timer 1 */
-    TCON      = 0x40;
-    TMOD      = 0x10;
-    CKCON     = 0x02;	
-    TL1       = delay_LB[0];
+    SFRPAGE   = TIMER01_PAGE;	/* Initialize Timer0 and Timer1 */
+    TCON      = 0x50;
+    TMOD      = 0x11;
+    CKCON     = 0x0A;
+	
+		TL1       = delay_LB[0];
     TH1       = delay_HB[0];
+	
+    TL0       = 0x4C;
+    TH0       = 0xA0;
+		TF0 			= 0;
+		TR0				= 1;
 
 	
     SFRPAGE   = TMR2_PAGE;	/* Timer 2 */

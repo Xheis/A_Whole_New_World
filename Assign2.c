@@ -26,6 +26,7 @@ ________________________________________________________________________________
 #include "c8051F120.h"	
 #include "Assign2.h"
 #include "Methods.c"
+#include "LCD.c"
 
 
 /* Variables */
