@@ -26,7 +26,6 @@
 */
 
 
-
 /* Function Prototypes */
 void initLCD(void);
 void clearLCD(void);

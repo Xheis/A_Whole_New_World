@@ -1,6 +1,8 @@
 // LCD.c - This .c file contains the declarations 
 // for the LCD functions 
-
+#include "c8051F120.h"
+#include "Assign2.h"
+#include "Methods.h"
 #include "LCD.h"
 
 //unsigned char print_mem[LCD_SEGMENTS + 1]; /* Number of characters plus the NULL character */

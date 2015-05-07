@@ -23,16 +23,17 @@ ________________________________________________________________________________
 //                              Declarations
 //--------------------------------------------------------------------------------------------------------------------
 
-#include "c8051F120.h"	
+#include "c8051F120.h"
 #include "Assign2.h"
-#include "Methods.c"
-#include "LCD.c"
+#include "Methods.h"
+#include "LCD.h"
 
 
 /* Variables */
-unsigned char gameState = 1;		/* Used for switching to and from the volume and play states	*/
+unsigned char gameState = 0;		/* Used for switching to and from the volume and play states	*/
 int debugcounter=0;
 unsigned long old_time = 0;
+
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -58,6 +59,8 @@ void main(void)
 	DAC_Init();
 	Interrupts_Init();
 
+	P2 = 0x0;
+	
 	while(1)
 	{	
 			//Allow user to change current gamestate. i.e. menu or playing
@@ -68,11 +71,7 @@ void main(void)
 			{
 				case 0: /* Volume Menu */
 					//Clear any previous visuals
-				  
-					if((millis() - old_time)>500){
-							LD1 = ~LD1;
-							old_time = millis();
-					}
+					blink();
 					Change_Volume();
 					Display_Volume();
 					break;
@@ -83,10 +82,10 @@ void main(void)
 		}
 		
 		//This is a debug counter that should never, EVER execute. So, delete it when you have no issues at the end.
-		while(1)
-		{	
-			debugcounter +=1;
-		}
+//		while(1)
+//		{	
+//			debugcounter +=1;
+//		}
 
 }
 
@@ -146,4 +145,12 @@ unsigned char getState(void){
 void setState(unsigned char temp_state){
 	P2 = 0; /* Clear port 2 in every state change */
 	gameState = temp_state;
+}
+
+void blink(void){
+
+	if((millis() - old_time)>500){
+		LD1 = ~LD1;
+		old_time = millis();
+	}
 }

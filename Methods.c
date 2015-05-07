@@ -15,15 +15,16 @@
 //                              Declarations
 //--------------------------------------------------------------------------------------------------------------------
 
-
+#include "c8051F120.h"
+#include "Assign2.h"
 #include "Methods.h"
-
+#include "LCD.h"
 
 
 /*    Definitions    */
 #define  	WAVE_RESOLUTION    	256   	// Our 256bit sine wave resolution
-#define   MAX_VOLUME        	16    	// 16 different volumes
-#define   MAX_FADER      			255    	// 256 different fading volumes
+#define   	MAX_VOLUME        	16    	// 16 different volumes
+#define   	MAX_FADER      			255    	// 256 different fading volumes
 #define 	SINE_OFFSET     		128 		// DC offset for sin wave
 #define 	DEFAULT_OCTAVE			7
 #define 	DEFAULT_VOLUME			15			// Defualt volume. 0-15. 0=> mute
@@ -44,7 +45,7 @@ unsigned short milliseconds = 0;
 volatile unsigned short theta[NUM_NOTES] = {0};		
 volatile unsigned short d_theta[NUM_NOTES] = {0};		//Our d_theta variable does...
 unsigned char 	data 		num_active_keys = 0; /* The number of keys which are currently being pressed */
-unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=> max */
+volatile unsigned char   data    volume = 	DEFAULT_VOLUME; 	/* Volume 0-15. 0=> mute, 15=> max */
 unsigned char   data    octave = 	DEFAULT_OCTAVE; 	/* Set inital octave */
 bitbang							 		fader[NUM_NOTES] = {0,MAX_FADER};		/* this is for reseting the fader 0=>fader has been reset. 1=> fader is currently running */
 
@@ -238,7 +239,6 @@ void Interrupts_Init()
 void Timer2_ISR (void) interrupt 5
 {
     DAC_Multi_Sine_Wave();
-    //DAC_Sine_Wave();  //  Working!
     TF2 = 0;        // Reset Interrupt
 
 }
@@ -650,10 +650,12 @@ void Display_Volume()
 {
 	//Make LED 5,6,7 & 8 display the volume
 	//	MSB=LED5;LSB=LED8
+	char i = LD1;
 	unsigned char	tempVolume = volume;
 	tempVolume = mirror_binary(tempVolume);
-	tempVolume = (0x0F&tempVolume);
-	P2 = P2|tempVolume;
+	tempVolume = (0xF0&tempVolume);
+	P2 = tempVolume;
+	LD1 =i;
 }
 
 //unsigned char mirror_binary(unsigned char num){
@@ -686,22 +688,28 @@ void Display_Volume()
 --------------------------------------------------------------------------------------------------------------------*/
 void Change_Volume()
 {
-	if (~PB1)
+	if (~PB2)
 	{
 		delay(25);
-		while (~PB1);
+		while (~PB2){
+			blink();
+		}
 		if (volume < 15)
 		{
-			volume+=1;
+			volume++;
 		}
 	}
-	else if (~PB2)
+	else if (~PB1)
 	{
 		delay(25);
-		while (~PB2);
+		while (~PB1){
+			blink();
+		}
+
+		
 		if (volume > 0)
 		{
-			volume-=1;
+			volume--;
 		}
 	}
 }
@@ -712,15 +720,16 @@ void Change_Volume()
 
 
 /* Interrupt for a millisecond timer */
-void update_millis(void) interrupt 1{
+void update_millis(void) interrupt 1
+{
 	milliseconds++;
 	reset_Timer_0();
 }
 
 void reset_Timer_0(void){
 	TF0 			= 0;  /* Clear flag */
-	TL0       = 0x4C;	/* Top up for a 1 millisecond delay */
-  TH0       = 0xA0;
+	TL0       		= 0x4C;	/* Top up for a 1 millisecond delay */
+  	TH0       		= 0xA0;
 	TR0 			= 1; 		/* Enable Timer */
 }
 
