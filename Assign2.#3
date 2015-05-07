@@ -106,9 +106,9 @@ void General_Init()
 {
 	WDTCN = 0xde;
 	WDTCN = 0xad;
-  	SFRPAGE = CONFIG_PAGE;
+  SFRPAGE = CONFIG_PAGE;
 	P2MDOUT = 0xff;		// Need to make pushpull outputs to drive LEDs properly
-	P3MDOUT = 0x8F;       // Outputs
+	P3MDOUT = 0x8F       // Outputs
 	XBR2 = 0x40;
 }
 
