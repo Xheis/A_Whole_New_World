@@ -83,6 +83,7 @@ void main(void)
 					blink();
 					Change_Volume();
 					Display_Volume();
+					Change_Octave();
 					break;
 				case 1: /* Play Menu */
 					PORT1_TO_PLAY_TONE();

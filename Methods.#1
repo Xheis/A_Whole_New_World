@@ -364,7 +364,6 @@ void delay(unsigned short delay_len){
 
 --------------------------------------------------------------------------------------------------------------------*/
 unsigned char delay_run(unsigned char delay_len){ /* a millisecond delay - caution CPU can do nothing else while running this delay*/
-	unsigned char state = getState();
 	if(delay_len==0){	/* Just to double check that we havent called a delay which doesnt exsist */
 		delay_len++;
 	}
@@ -375,24 +374,11 @@ unsigned char delay_run(unsigned char delay_len){ /* a millisecond delay - cauti
 	}
 	
 	TL1 = delay_LB[delay_len];	/* Set lowbyte 												*/
-  TH1 = delay_HB[delay_len];	/* Set highbyte 											*/
+  	TH1 = delay_HB[delay_len];	/* Set highbyte 											*/
 	TF1 = 0;										/* Clear Timer1 Flag	 								*/
 	TR1 = 1; 										/* Turn on Timer1 										*/
 	
-	while(~TF1){								/* wait till timer flag is set 				*/
-															/* Checks to do during the delay	 		*/
-		
-		if(~MPB){									/* If Motherboard Push button is pressed */
-			while(~MPB);						/* Wait till button is released */
-			if(state){
-					state = 0; 					/* Toggle state */
-			}else{
-					state = 1;
-			}
-			setState(state);
-			return(1);							/* Exit delay 1=> stop delay*/			
-		}
-	}
+	while(~TF1);
 	TR1 = 0; 										/* Turn off Timer1 								*/
 	return(0);
 }
@@ -714,6 +700,47 @@ void Change_Volume()
 	}
 }
 
+
+
+
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------
+        Function:         Change_Octave
+
+        Description:      Sets the Volume whilst in game menu
+
+        Revisions:
+
+--------------------------------------------------------------------------------------------------------------------*/
+void Change_Octave()
+{
+	if (~PB2)
+	{
+		delay(25);
+		while (~PB2){
+			blink();
+		}
+		if (octave < 8)
+		{
+			octave++;
+		}
+	}
+	else if (~PB1)
+	{
+		delay(25);
+		while (~PB1){
+			blink();
+		}
+
+		
+		if (octave > 0)
+		{
+			octave--;
+		}
+	}
+}
 
 
 

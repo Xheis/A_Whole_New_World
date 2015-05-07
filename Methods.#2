@@ -705,47 +705,6 @@ void Change_Volume()
 
 
 
-
-/*--------------------------------------------------------------------------------------------------------------------
-        Function:         Change_Octave
-
-        Description:      Sets the Volume whilst in game menu
-
-        Revisions:
-
---------------------------------------------------------------------------------------------------------------------*/
-void Change_Octave()
-{
-	if (~PB4)
-	{
-		delay(25);
-		while (~PB4){
-			blink();
-		}
-		if (octave < 8)
-		{
-			octave++;
-		}
-	}
-	else if (~PB3)
-	{
-		delay(25);
-		while (~PB3){
-			blink();
-		}
-
-		
-		if (octave > 0)
-		{
-			octave--;
-		}
-	}
-}
-
-
-
-
-
 /* Interrupt for a millisecond timer */
 void update_millis(void) interrupt 1
 {

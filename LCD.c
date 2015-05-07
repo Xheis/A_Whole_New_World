@@ -43,14 +43,16 @@ writeLCD(returnChar);
 
 void printLCD(unsigned char *word){
 	int fill = 0;
+	int i = 0;
 	while(*word){ /* print character by character till we reach the NULL character */
 		fill++;
 		writeLCD(*word++); /* increment pointer to the next character in the word */
-		}	
+		
 	}
-	while(16-fill){
-		writeLCD(' ');
-		}
+	for(fill; fill<16; fill++)
+	{
+	writeLCD(' ');
+	}
 
 }
 

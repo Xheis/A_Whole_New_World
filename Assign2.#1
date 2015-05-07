@@ -79,11 +79,11 @@ void main(void)
 			{
 				case 0: /* Volume Menu */
 					//Clear any previous visuals
-					cmdLCD(CLR_DISP);
 					printLCD("Volume Levels");
 					blink();
 					Change_Volume();
 					Display_Volume();
+					Change_Octave();
 					break;
 				case 1: /* Play Menu */
 					PORT1_TO_PLAY_TONE();
