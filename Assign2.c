@@ -67,7 +67,7 @@ void main(void)
 			{
 				case 0: /* Volume Menu */
 					//Clear any previous visuals
-					//P2 = 0x00;
+					P2 = 0x00;
 					Change_Volume();
 					Display_Volume();
 					break;

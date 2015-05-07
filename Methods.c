@@ -26,7 +26,7 @@
 #define   MAX_FADER      			255    	// 256 different fading volumes
 #define 	SINE_OFFSET     		128 		// DC offset for sin wave
 #define 	DEFAULT_OCTAVE			7
-#define 	DEFAULT_VOLUME			7			// Defualt volume. 0-15. 0=> mute
+#define 	DEFAULT_VOLUME			15			// Defualt volume. 0-15. 0=> mute
 #define		NUM_NOTES						14
 
 
@@ -155,10 +155,10 @@ void Timer_Init()
 		TL1       = delay_LB[0];
     TH1       = delay_HB[0];
 	
-    TL0       = 0x4C;
-    TH0       = 0xA0;
-		TF0 			= 0;
-		TR0				= 1;
+//    TL0       = 0x4C;
+//    TH0       = 0xA0;
+//		TF0 			= 0;
+//		TR0				= 1;
 
 	
     SFRPAGE   = TMR2_PAGE;	/* Timer 2 */
@@ -219,7 +219,11 @@ void DAC_Init()
 --------------------------------------------------------------------------------------------------------------------*/
 void Interrupts_Init()
 {
-    IE        = 0xA0;  // Global enable interrupt + timer 2 interrupt
+		IE = 0x0; 	/* Clear the register */
+		EA = 1; 		/* Enable global interupts */
+		ET2 = 1;		/* Enable timer2 interrupt */
+		ET0 = 0;		/* Enable timer0 interrupt */
+
 }
 
 
@@ -248,7 +252,6 @@ void Interrupts_Init()
 --------------------------------------------------------------------------------------------------------------------*/
 void Timer2_ISR (void) interrupt 5
 {
-		LD1 = 1;
     DAC_Multi_Sine_Wave();
     //DAC_Sine_Wave();  //  Working!
     TF2 = 0;        // Reset Interrupt
@@ -482,12 +485,14 @@ void PORT1_TO_PLAY_TONE(void){
 			
 			
 			if(~PB1){
+				LD1 = 1;
 				set_Tone(0, j); /* Turn off note... This sets the d_theta to 0. We can therefore check the d_thetas for whether a note is being played */
 				theta[j] = 0;
 				j = j+7; /* Adjust j so it will point to the sharp of the note */
 			}
-			else
+			else /* Sharp has not been pressed */
 			{
+				LD1 = 0;
 				set_Tone(0, j+7); /* Turn off note... This sets the d_theta to 0. We can therefore check the d_thetas for whether a note is being played */
 				theta[j+7] = 0;		/* Reset theta position */
 			}
@@ -503,6 +508,9 @@ void PORT1_TO_PLAY_TONE(void){
 			theta[j+7] = 0;		/* Reset theta position */
 			
 		}
+	}
+	if(buttons_active==0){
+		TR2 = 0; /* If no buttons have been pressed, the turn off the timer */
 	}
 	num_active_keys = buttons_active; /* list the number of active buttons */
 }
@@ -660,7 +668,7 @@ void Display_Volume()
 	unsigned char	tempVolume = volume;
 	tempVolume = mirror_binary(tempVolume);
 	tempVolume = (0x0F&tempVolume);
-	P2 = tempVolume;
+	P2 = P2|tempVolume;
 }
 
 //unsigned char mirror_binary(unsigned char num){
